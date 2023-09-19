@@ -5,3 +5,4 @@
 [submodule "plugin/deps/fix-to-elim"]
 	path = plugin/deps/fix-to-elim
 	url = https://github.com/agrarpan/fix-to-elim.git
+	branch = master
