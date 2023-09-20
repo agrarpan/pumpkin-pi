@@ -77,14 +77,14 @@ let eq_lemmas_env env recs l pack_typ pack_trm =
       (* if applicable, pack the type *)
       let sigma, (e_ib, r_t) = pack_typ e r_t sigma in
       (* push new rec arg *)
-      let e_r = push_local (Anonymous, r_t) e_ib in
+      let e_r = push_local (Context.annotR Anonymous, r_t) e_ib in
       (* get the (possibly packed) equality type *)
       let sigma, r1 = pack_trm e_r (shift_by (new_rels2 e_r e) r1) sigma in
       let sigma, r2 = pack_trm e_r (mkRel 1) sigma in
       let sigma, r_t = reduce_type e_r sigma r1 in
       let r_eq = apply_eq {at_type = r_t; trm1 = r1; trm2 = r2} in
       (* push the equality *)
-      sigma, push_local (Anonymous, r_eq) e_r)
+      sigma, push_local (Context.annotR Anonymous, r_eq) e_r)
     env
     recs
 
@@ -122,7 +122,7 @@ let eq_lemmas env typ l pack_typ pack_trm nindices abstract_c_app sub_c_app_tran
             let c_app_trans = sub_c_app_trans (r1, r2) c_app in
             let typ_b = shift c_body_type in
             let p_b = { at_type = typ_b; trm1 = c_body_b; trm2 = abs_c_app } in
-            let p = mkLambda (Anonymous, at_type, apply_eq p_b) in
+            let p = mkLambda (Context.annotR Anonymous, at_type, apply_eq p_b) in
             let eq_proof_app = {at_type; p; trm1 = r1; trm2 = r2; h; b} in
             let eq_proof = apply_eq_ind eq_proof_app in
             (eq_proof, shift_by (2 + nindices) h, c_app_trans))
@@ -255,7 +255,7 @@ let eq_lemmas_algebraic env typ l =
            (* push index for packing in backward direction *)
            let sigma, env_ib =
              Util.on_snd
-               (fun t -> push_local (Anonymous, t) env)
+               (fun t -> push_local (Context.annotR Anonymous, t) env)
                (reduce_type env sigma (get_arg off typ))
            in sigma, (env_ib, reindex_app (reindex off (mkRel 1)) (shift typ)))
          (fun env -> pack env l) (* pack terms *)
@@ -332,16 +332,16 @@ let equiv_proof_algebraic env l =
            (* unpack env for retraction *)
            let b_sig_typ = dest_sigT typ_app in
            let ib_typ = b_sig_typ.index_type in
-           let env_ib = push_local (Anonymous, ib_typ) env in
+           let env_ib = push_local (Context.annotR Anonymous, ib_typ) env in
            let b_typ = mkAppl (shift b_sig_typ.packer, [mkRel 1]) in
-           push_local (Anonymous, b_typ) env_ib)
+           push_local (Context.annotR Anonymous, b_typ) env_ib)
          (fun npm args ->
            (* reindex the args for retraction *)
            let index_back = insert_index (off - npm) (mkRel 2) in
            let reindex_back = reindex (List.length args) (mkRel 1) in
            reindex_back (index_back args))
          (fun env typ_app eq_typ eq_proof ->
-           let env_p = push_local (Anonymous, typ_app) env in
+           let env_p = push_local (Context.annotR Anonymous, typ_app) env in
            let trm2 = unshift (all_eq_substs (eq_typ.trm1, mkRel 2) eq_typ.trm2) in
            let at_type = shift typ_app in
            let p_b = apply_eq { at_type; trm1 = mkRel 1; trm2 } in
@@ -435,7 +435,7 @@ let equiv_proof_body_curry_record env_to sigma p pms l =
     let open Produtils in
     let rec build_proof env pms at_type to_elim arg =
       let (typ1, typ2) as typs = (to_elim.typ1, to_elim.typ2) in
-      let env_proof = push_local (Anonymous, shift typ2) (push_local (Anonymous, typ1) env) in
+      let env_proof = push_local (Context.annotR Anonymous, shift typ2) (push_local (Context.annotR Anonymous, typ1) env) in
       let (typ1, typ2) as typs = map_tuple (shift_by 2) typs in
       let at_type = shift_by 2 at_type in
       let pms = shift_all_by 2 pms in
@@ -448,7 +448,7 @@ let equiv_proof_body_curry_record env_to sigma p pms l =
             let pms = shift_all pms in
             let arg_abs = all_eq_substs (shift curr, curr) (shift arg) in
             let trm2 = mkAppl (lift_back l, snoc (mkAppl (lift_to l, snoc arg_abs pms)) pms) in
-            mkLambda (Anonymous, typ2, apply_eq { at_type = shift at_type; trm1 = arg_abs; trm2 })
+            mkLambda (Context.annotR Anonymous, typ2, apply_eq { at_type = shift at_type; trm1 = arg_abs; trm2 })
           in
           let proof = build_proof env_proof pms at_type to_elim arg in
           elim_prod { to_elim; p; proof; arg = curr }

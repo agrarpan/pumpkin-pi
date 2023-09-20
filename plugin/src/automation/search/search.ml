@@ -400,7 +400,7 @@ let promote_forget_cases_algebraic env off is_fwd orn_p nargs o n =
 let make_packer env b_typ args (off, ib_typ) is_fwd sigma : types state =
   let sub_index = if is_fwd then insert_index else reindex in
   let packed_args = sub_index off (mkRel 1) (shift_all args) in
-  let env_abs = push_local (Anonymous, ib_typ) env in
+  let env_abs = push_local (Context.annotR Anonymous, ib_typ) env in
   abstract_arg env_abs sigma off (mkAppl (b_typ, packed_args))
 
 (*
@@ -447,8 +447,8 @@ let pack_unpacked env sigma packer ib_typ ib_rel unpacked =
   let adjust trm = shift_local ib_rel 1 (shift trm) in
   let typ_body = sub_index (sub_typ (adjust unpacked)) in
   let packer_indexed = apply_packer env sigma (shift packer) (mkRel 1) in
-  let index_body = mkLambda (Anonymous, packer_indexed, typ_body) in
-  mkLambda (Anonymous, shift ib_typ, index_body)
+  let index_body = mkLambda (Context.annotR Anonymous, packer_indexed, typ_body) in
+  mkLambda (Context.annotR Anonymous, shift ib_typ, index_body)
 
 (*
  * Pack the hypothesis of an ornamental forgetful function
@@ -683,7 +683,7 @@ let find_motive_swap env_motive typ nargs pms =
  * Find the cases for promote or forget for swapping constructors
  *)
 let find_cases_swap env p elim_p_typ swap_map o nargs sigma =
-  let env_p = push_local (Anonymous, p) env in
+  let env_p = push_local (Context.annotR Anonymous, p) env in
   let ncons = List.length swap_map in
   List.mapi
     (fun i c ->
@@ -812,7 +812,7 @@ let find_promote_or_forget_curry_record env_pms a b is_fwd sigma =
   let pms = mk_n_rels npm in
   let a_pms = mkAppl (a, pms) in
   let b_pms = mkAppl (b, pms) in
-  let env_arg = push_local (Anonymous, directional a_pms b_pms) env_pms in
+  let env_arg = push_local (Context.annotR Anonymous, directional a_pms b_pms) env_pms in
   let pms = shift_all pms in
   let a_pms, b_pms = map_tuple shift (a_pms, b_pms) in
   let c_a = mkAppl (mkConstruct (fst (destInd a), 1), pms) in
@@ -822,7 +822,7 @@ let find_promote_or_forget_curry_record env_pms a b is_fwd sigma =
   let sigma, body =
     if is_fwd then
       let elim = type_eliminator env_pms (fst (destInd a)) in
-      let p = mkLambda (Anonymous, a_pms, shift b_pms) in
+      let p = mkLambda (Context.annotR Anonymous, a_pms, shift b_pms) in
       let sigma, cs =
         let env_c = zoom_env zoom_product_type env_arg c_a_typ in
         let rec make_c n sigma =
