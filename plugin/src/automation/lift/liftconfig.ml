@@ -26,6 +26,7 @@ open Indutils
 open Defutils
 open Nameutils
 open Hofs
+open Contextutils
 
 (*
  * Lifting configuration: Includes the lifting, types, and cached rules
@@ -319,14 +320,14 @@ let initialize_proj_rules c env sigma =
        let projT2 = reconstruct_lambda env_b (project_value b_sig t) in
        let rew_projT2 =
          let index_type = b_sig.index_type in
-         let env_index = push_local (Context.annotR Anonymous, index_type) env_b in
+         let env_index = push_local (Anonymous, index_type) env_b in
          let env_eq =
            let eq_typ =
              let at_type = shift index_type in
              let trm1 = shift (project_index b_sig t) in
              let trm2 = mkRel 1 in
              apply_eq { at_type; trm1; trm2 }
-           in push_local (Context.annotR Anonymous, eq_typ) env_index
+           in push_local (Anonymous, eq_typ) env_index
          in
          let rew =
            let index_type = shift_by 2 index_type in
@@ -345,14 +346,14 @@ let initialize_proj_rules c env sigma =
        let id = reconstruct_lambda env_a t in
        let rew_id =
          let index_type = b_sig.index_type in
-         let env_index = push_local (Context.annotR Anonymous, index_type) env_a in
+         let env_index = push_local (Anonymous, index_type) env_a in
          let env_eq =
            let eq_typ =
              let at_type = shift index_type in
              let trm1 = mkAppl (indexer, shift_all (mk_n_rels (nb_rel env_a))) in
              let trm2 = mkRel 1 in
              apply_eq { at_type; trm1; trm2 }
-           in push_local (Context.annotR Anonymous, eq_typ) env_index
+           in push_local (Anonymous, eq_typ) env_index
          in reconstruct_lambda env_eq (shift_by 2 t)
        in
        let projT2_typ = reconstruct_lambda (pop_rel_context 1 env_b) (unshift b_sig.packer) in
@@ -503,7 +504,7 @@ let initialize_etas c cached env sigma =
         | UnpackSigma ->
            (* rewrite in pack (identity at eq_refl) *)
            let sigma, (env_eq, (eq, eq_typ), (b, b_typ)) =
-             let push_anon t = push_local (Context.annotR Anonymous, t) in
+             let push_anon t = push_local (Anonymous, t) in
              let env_sig = zoom_env zoom_lambda_term env a_typ in
              let sigma, (i_b_typ, b_typ, i_b) =
                let sig_eq = mkAppl (a_typ, mk_n_rels (nb_rel env_sig)) in
@@ -811,14 +812,14 @@ let applies_eta c env trm sigma =
                    let index_type =
                      let packer =
                        let unpacked = mkAppl (shift b_typ, [mkRel 1]) in
-                       mkLambda (Context.annotR Anonymous, i_b_typ, unpacked)
+                       mkLambda (get_rel_ctx_name Anonymous, i_b_typ, unpacked)
                      in pack_sigT { index_type = i_b_typ; packer }
                    in
                    let packer =
                      let at_type = shift i_b_typ in
                      let trm1 = project_index (dest_sigT (shift index_type)) (mkRel 1) in
                      let trm2 = shift i_b' in
-                     mkLambda (Context.annotR Anonymous, index_type, apply_eq { at_type; trm1; trm2 })
+                     mkLambda (get_rel_ctx_name Anonymous, index_type, apply_eq { at_type; trm1; trm2 })
                    in
                    let index =
                      let index_type_app = dest_sigT index_type in
@@ -1108,9 +1109,9 @@ let initialize_constr_env c env b_constr sigma =
          let sigma, t' =
            let args = unfold_args t in
            reduce_term env sigma (mkAppl (typ, args))
-         in init (push_local (n, t') env) ind typ b sigma 
+         in init (push_local (n.binder_name, t') env) ind typ b sigma 
        else
-         init (push_local (n, t) env) ind typ b sigma
+         init (push_local (n.binder_name, t) env) ind typ b sigma
     | _ ->
        sigma, env
   in
@@ -1697,7 +1698,7 @@ let initialize_dep_elim_env c env sigma =
      let rec init_p_typ env p_typ sigma =
        match kind p_typ with
        | Prod (n, t, b) ->
-          let env_b = push_local (n, t) env in
+          let env_b = push_local (n.binder_name, t) env in
           let sigma, b' = init_p_typ env_b b sigma in
           if is_or_applies elim_typ_rev t then
             let args = unfold_args t in
@@ -1713,11 +1714,11 @@ let initialize_dep_elim_env c env sigma =
           sigma, p_typ
      in
      let sigma, p_typ' = init_p_typ env p_typ sigma in
-     let env_p = push_local (p_n, p_typ') env in
+     let env_p = push_local (p_n.binder_name, p_typ') env in
      let rec init_case_typ env case_typ p sigma =
        match kind case_typ with
        | Prod (n, t, b) ->
-          let env_b = push_local (n, t) env in
+          let env_b = push_local (n.binder_name, t) env in
           let sigma, b' = init_case_typ env_b b (shift p) sigma in
           if is_or_applies elim_typ_rev t then
             let args = unfold_args t in
@@ -1755,7 +1756,7 @@ let initialize_dep_elim_env c env sigma =
        | Lambda (n, t, b) ->
           if i < List.length elim_app_rev.cs then
             let sigma, t' = init_case_typ env t (mkRel (i + 1)) sigma in
-            init (push_local (n, t') env) b (i + 1) sigma
+            init (push_local (n.binder_name, t') env) b (i + 1) sigma
           else if is_or_applies elim_typ_rev t then
             let args = unfold_args t in
             let sigma, t' =
@@ -1763,9 +1764,9 @@ let initialize_dep_elim_env c env sigma =
                 sigma, snd (get_types c)
               else
                 reduce_term env sigma (mkAppl (snd (get_types c), args))
-            in init (push_local (n, t') env) b (i + 1) sigma
+            in init (push_local (n.binder_name, t') env) b (i + 1) sigma
           else
-            init (push_local (n, t) env) b (i + 1) sigma
+            init (push_local (n.binder_name, t) env) b (i + 1) sigma
        | _ ->
           sigma, env
      in init env_p b 0 sigma

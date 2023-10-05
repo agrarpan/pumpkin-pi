@@ -8,6 +8,7 @@ open Nameops
 open Declarations
 open Apputils
 open Sigmautils
+open Contextutils
 
 (*
  * Given a relative context quantifying an inductive family's indices, assemble
@@ -91,8 +92,8 @@ let eta_guard_motive ncons nindex typ =
           (sigT_rect,
            [|index_type; packer;
              mkLambda (name, domain, codomain);
-             mkLambda (Context.annotR name_1, index_type,
-                       mkLambda (Context.annotR name_2, packed_type, body))|])
+             mkLambda (get_rel_ctx_name name_1, index_type,
+                       mkLambda (get_rel_ctx_name name_2, packed_type, body))|])
       else
         mkLambda ( name, domain, body)
   in
