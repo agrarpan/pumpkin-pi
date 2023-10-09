@@ -583,5 +583,5 @@ let configure_manual d_orn d_orn_inv constrs elims etas iotas =
 let do_unpack_constant ident const_ref =
   let env = Global.env () in
   let sigma = (Evd.from_env env) in
-  let term = Nametab.locate_constant const_ref |> unpack_constant env sigma in
+  let sigma, term = Nametab.locate_constant const_ref |> unpack_constant env sigma in
   ignore (define_print ident term sigma)

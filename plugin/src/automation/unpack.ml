@@ -17,7 +17,7 @@ let eval_tactic env sigma ?goal tac =
    * Coq handles any lingering typeclass/implicit argument inference in the usual way. *)
   let sigma = Pretyping.solve_remaining_evars (Pretyping.default_inference_flags true) env ~initial:sigma0 sigma  in
   let proofs = Proofview.partial_proof ent pv |> List.map (EConstr.to_constr sigma) in
-  List.hd proofs
+  sigma, List.hd proofs
 
 let call_tactic env sigma tac args =
   let open Tacexpr in
