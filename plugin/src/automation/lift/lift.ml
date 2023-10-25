@@ -357,7 +357,7 @@ let do_lift_ind env sigma l typename suffix ind ignores is_lift_module =
           r.s_PROJ
       in
       (try
-         declare_structure (r.s_CONST, pks, ps);
+         declare_structure ((ind', 1), pks, ps);
          ind'
        with _ ->
          Feedback.msg_warning
