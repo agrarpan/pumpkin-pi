@@ -19,6 +19,7 @@ open Promotion
 open Liftconfig
 open Liftrules
 open Evd
+open Record
 
 (*
  * The top-level lifting algorithm
@@ -272,8 +273,8 @@ let define_lifted_eliminator ?(suffix="_sigT") l ind0 ind sort =
       let raw_ident = Indrec.make_elimination_ident ind_name sort in
       Nameops.add_suffix raw_ident suffix
     in
-    let elim0 = Indrec.lookup_eliminator ind0 sort in
-    let elim = Indrec.lookup_eliminator ind sort in
+    let elim0 = Indrec.lookup_eliminator env ind0 sort in
+    let elim = Indrec.lookup_eliminator env ind sort in
     let sigma, (eta_term, eta_type) =
       let sigma, term = Evarutil.new_global (Evd.from_env env) elim in
       let sigma, typ = Typing.type_of env sigma term in
@@ -281,8 +282,8 @@ let define_lifted_eliminator ?(suffix="_sigT") l ind0 ind sort =
       let term, typ = EConstr.(to_constr sigma term, to_constr sigma typ) in
       sigma, Depelim.eta_guard_eliminator mind_specif term typ
     in
-    let elim' = UnivGen.constr_of_global (Defutils.define_term ~typ:eta_type ident sigma eta_term true) in
-    let elim0 = UnivGen.constr_of_global elim0 in
+    let elim' = UnivGen.constr_of_monomorphic_global (Defutils.define_term ~typ:eta_type ident sigma eta_term true) in
+    let elim0 = UnivGen.constr_of_monomorphic_global elim0 in
     save_lifting (lift_to l, lift_back l, elim0) elim';
     save_lifting (lift_back l, lift_to l, elim') elim0
 
@@ -325,7 +326,7 @@ let do_lift_ind env sigma l typename suffix ind ignores is_lift_module =
     let ind' =
       declare_inductive typename consnames is_template univs nparam arity' constypes'
     in
-    List.iter (define_lifted_eliminator l ind ind') (List.filter (fun (x) -> not (Sorts.family_equal x InSProp)) ind_body.mind_kelim);
+    List.iter (define_lifted_eliminator l ind ind') [ind_body.mind_kelim];
     declare_inductive_liftings l ind ind' (List.length constypes);
     (* Lift record projections *)
     try
@@ -357,7 +358,7 @@ let do_lift_ind env sigma l typename suffix ind ignores is_lift_module =
           r.s_PROJ
       in
       (try
-         declare_structure ((ind', 1), pks, ps);
+         declare_structure_entry ((ind', 1), pks, ps);
          ind'
        with _ ->
          Feedback.msg_warning

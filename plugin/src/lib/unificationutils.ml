@@ -24,7 +24,7 @@ let mk_n_evars n env =
  *)
 let eunify env etrm1 etrm2 sigma =
   try
-    the_conv_x env etrm1 etrm2 sigma, true
+    unify_delay ?flags:None env sigma etrm1 etrm2, true
   with _ ->
     sigma, false
     
