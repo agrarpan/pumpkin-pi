@@ -201,20 +201,20 @@ let lift_core env c trm sigma =
         | Prod (n, t, b) ->
            (* PROD *)
            let sigma, t' = lift_rec en sigma c t in
-           let en_b = push_local (n, t) en in
+           let en_b = push_local (n.binder_name, t) en in
            let sigma, b' = lift_rec en_b sigma (zoom c) b in
            (sigma, mkProd (n, t', b'))
         | Lambda (n, t, b) ->
            (* LAMBDA *)
            let sigma, t' = lift_rec en sigma c t in
-           let en_b = push_local (n, t) en in
+           let en_b = push_local (n.binder_name, t) en in
            let sigma, b' = lift_rec en_b sigma (zoom c) b in
            (sigma, mkLambda (n, t', b'))
         | LetIn (n, trm, typ, e) ->
            (* LETIN *)
            let sigma, trm' = lift_rec en sigma c trm in
            let sigma, typ' = lift_rec en sigma c typ in
-           let en_e = push_let_in (n, trm, typ) en in
+           let en_e = push_let_in (n.binder_name, trm, typ) en in
            let sigma, e' = lift_rec en_e sigma (zoom c) e in
            (sigma, mkLetIn (n, trm', typ', e'))
         | Case (ci, ct, m, bs) ->
@@ -325,7 +325,7 @@ let do_lift_ind env sigma l typename suffix ind ignores is_lift_module =
     let ind' =
       declare_inductive typename consnames is_template univs nparam arity' constypes'
     in
-    List.iter (define_lifted_eliminator l ind ind') ind_body.mind_kelim;
+    List.iter (define_lifted_eliminator l ind ind') (List.filter (fun (x) -> not (Sorts.family_equal x InSProp)) ind_body.mind_kelim);
     declare_inductive_liftings l ind ind' (List.length constypes);
     (* Lift record projections *)
     try
@@ -357,7 +357,7 @@ let do_lift_ind env sigma l typename suffix ind ignores is_lift_module =
           r.s_PROJ
       in
       (try
-         declare_structure (ind', (ind', 1), pks, ps);
+         declare_structure ((ind', 1), pks, ps);
          ind'
        with _ ->
          Feedback.msg_warning

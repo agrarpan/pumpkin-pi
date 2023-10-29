@@ -26,6 +26,7 @@ open Indutils
 open Defutils
 open Nameutils
 open Hofs
+open Contextutils
 
 (*
  * Lifting configuration: Includes the lifting, types, and cached rules
@@ -534,7 +535,7 @@ let initialize_etas c cached env sigma =
       let etas =
         let eta_a_n, eta_b_n =
           let promote = Constant.canonical (fst (destConst l.orn.promote)) in
-          let (_, _, lab) = KerName.repr promote in
+          let (_, lab) = KerName.repr promote in
           let base_n = Label.to_id lab in
           (with_suffix base_n "eta_a", with_suffix base_n "eta_b")
         in
@@ -592,7 +593,7 @@ let initialize_iotas c cached env sigma =
       let iotas =
         let iota_a_n, iota_b_n =
           let promote = Constant.canonical (fst (destConst l.orn.promote)) in
-          let (_, _, lab) = KerName.repr promote in
+          let (_, lab) = KerName.repr promote in
           let base_n = Label.to_id lab in
           (with_suffix base_n "iota_a", with_suffix base_n "iota_b")
         in
@@ -811,14 +812,14 @@ let applies_eta c env trm sigma =
                    let index_type =
                      let packer =
                        let unpacked = mkAppl (shift b_typ, [mkRel 1]) in
-                       mkLambda (Anonymous, i_b_typ, unpacked)
+                       mkLambda (get_rel_ctx_name Anonymous, i_b_typ, unpacked)
                      in pack_sigT { index_type = i_b_typ; packer }
                    in
                    let packer =
                      let at_type = shift i_b_typ in
                      let trm1 = project_index (dest_sigT (shift index_type)) (mkRel 1) in
                      let trm2 = shift i_b' in
-                     mkLambda (Anonymous, index_type, apply_eq { at_type; trm1; trm2 })
+                     mkLambda (get_rel_ctx_name Anonymous, index_type, apply_eq { at_type; trm1; trm2 })
                    in
                    let index =
                      let index_type_app = dest_sigT index_type in
@@ -1108,9 +1109,9 @@ let initialize_constr_env c env b_constr sigma =
          let sigma, t' =
            let args = unfold_args t in
            reduce_term env sigma (mkAppl (typ, args))
-         in init (push_local (n, t') env) ind typ b sigma 
+         in init (push_local (n.binder_name, t') env) ind typ b sigma 
        else
-         init (push_local (n, t) env) ind typ b sigma
+         init (push_local (n.binder_name, t) env) ind typ b sigma
     | _ ->
        sigma, env
   in
@@ -1256,7 +1257,7 @@ let initialize_dep_constrs c cached env sigma =
       let dep_constrs =
         let c_a_n, c_b_n =
           let promote = Constant.canonical (fst (destConst l.orn.promote)) in
-          let (_, _, lab) = KerName.repr promote in
+          let (_, lab) = KerName.repr promote in
           let base_n = Label.to_id lab in
           (with_suffix base_n "dep_constr_a", with_suffix base_n "dep_constr_b")
         in
@@ -1697,7 +1698,7 @@ let initialize_dep_elim_env c env sigma =
      let rec init_p_typ env p_typ sigma =
        match kind p_typ with
        | Prod (n, t, b) ->
-          let env_b = push_local (n, t) env in
+          let env_b = push_local (n.binder_name, t) env in
           let sigma, b' = init_p_typ env_b b sigma in
           if is_or_applies elim_typ_rev t then
             let args = unfold_args t in
@@ -1713,11 +1714,11 @@ let initialize_dep_elim_env c env sigma =
           sigma, p_typ
      in
      let sigma, p_typ' = init_p_typ env p_typ sigma in
-     let env_p = push_local (p_n, p_typ') env in
+     let env_p = push_local (p_n.binder_name, p_typ') env in
      let rec init_case_typ env case_typ p sigma =
        match kind case_typ with
        | Prod (n, t, b) ->
-          let env_b = push_local (n, t) env in
+          let env_b = push_local (n.binder_name, t) env in
           let sigma, b' = init_case_typ env_b b (shift p) sigma in
           if is_or_applies elim_typ_rev t then
             let args = unfold_args t in
@@ -1755,7 +1756,7 @@ let initialize_dep_elim_env c env sigma =
        | Lambda (n, t, b) ->
           if i < List.length elim_app_rev.cs then
             let sigma, t' = init_case_typ env t (mkRel (i + 1)) sigma in
-            init (push_local (n, t') env) b (i + 1) sigma
+            init (push_local (n.binder_name, t') env) b (i + 1) sigma
           else if is_or_applies elim_typ_rev t then
             let args = unfold_args t in
             let sigma, t' =
@@ -1763,9 +1764,9 @@ let initialize_dep_elim_env c env sigma =
                 sigma, snd (get_types c)
               else
                 reduce_term env sigma (mkAppl (snd (get_types c), args))
-            in init (push_local (n, t') env) b (i + 1) sigma
+            in init (push_local (n.binder_name, t') env) b (i + 1) sigma
           else
-            init (push_local (n, t) env) b (i + 1) sigma
+            init (push_local (n.binder_name, t) env) b (i + 1) sigma
        | _ ->
           sigma, env
      in init env_p b 0 sigma
@@ -1829,7 +1830,7 @@ let initialize_dep_elims c cached env sigma =
       let sigma, b_elim = initialize_dep_elim (reverse c) env sigma in
       let elim_a_n, elim_b_n =
         let promote = Constant.canonical (fst (destConst c.l.orn.promote)) in
-        let (_, _, lab) = KerName.repr promote in
+        let (_, lab) = KerName.repr promote in
         let base_n = Label.to_id lab in
         (with_suffix base_n "dep_elim_a", with_suffix base_n "dep_elim_b")
       in
