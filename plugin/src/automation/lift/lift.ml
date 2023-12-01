@@ -326,7 +326,7 @@ let do_lift_ind env sigma l typename suffix ind ignores is_lift_module =
     let ind' =
       declare_inductive typename consnames is_template univs nparam arity' constypes'
     in
-    List.iter (define_lifted_eliminator l ind ind') [ind_body.mind_kelim];
+    List.iter (define_lifted_eliminator l ind ind') (Inductiveops.sorts_below ind_body.mind_kelim);
     declare_inductive_liftings l ind ind' (List.length constypes);
     (* Lift record projections *)
     try
