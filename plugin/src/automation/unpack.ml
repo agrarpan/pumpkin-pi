@@ -27,4 +27,4 @@ let call_tactic env sigma tac args =
 
 let unpack_constant env sigma const =
   let sigma, term = Evarutil.new_global sigma (Names.GlobRef.ConstRef const) in
-  call_tactic env sigma tactic_script [Constrextern.extern_constr false env sigma term]
+  call_tactic env sigma tactic_script [Constrextern.extern_constr ~lax:false env sigma term]
