@@ -1,4 +1,3 @@
-Add LoadPath "coq".
 Require Import Ornamental.Ornaments.
 Require Import List Sorting.Permutation.
 Require Import Test TestLift.
