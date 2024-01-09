@@ -20,7 +20,7 @@
 -I src/automation/lift
 -I src
 -R theories Ornamental
--Q coq Foo
+-R coq Foo
 
 src/coq-plugin-lib/src/utilities/utilities.ml
 src/coq-plugin-lib/src/utilities/utilities.mli

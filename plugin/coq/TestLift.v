@@ -1,7 +1,7 @@
 Require Import List.
 Require Import Ornamental.Ornaments.
-From Foo Require Import Test.
-From Foo Require Import Infrastructure.
+Require Import Test.
+Require Import Infrastructure.
 
 (*
  * Test lifting directly
