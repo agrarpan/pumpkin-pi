@@ -158,3 +158,6 @@ theories/Prod.v
 theories/Eliminators.v
 theories/Equivalences.v
 theories/Ornaments.v
+
+coq/Infrastructure.v
+coq/Test.v
