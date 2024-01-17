@@ -1,5 +1,5 @@
 Require Import List.
-Require Import Ornamental.Ornaments.
+Require Import Ornaments.
 
 Set DEVOID search prove coherence.
 Set DEVOID search prove equivalence.
