@@ -20,7 +20,6 @@
 -I src/automation/lift
 -I src
 -R theories Ornamental
--R coq Foo
 
 src/coq-plugin-lib/src/utilities/utilities.ml
 src/coq-plugin-lib/src/utilities/utilities.mli
@@ -157,3 +156,4 @@ theories/Unpack.v
 theories/Prod.v
 theories/Eliminators.v
 theories/Equivalences.v
+theories/Ornaments.v

@@ -1,5 +1,5 @@
 Require Import List.
-Require Import Ornaments.
+Require Import Ornamental.Ornaments.
 
 Set DEVOID search prove coherence.
 Set DEVOID search prove equivalence.
@@ -15,9 +15,6 @@ Definition packed_vector (T : Type) :=
   sigT (fun (n : nat) => vector T n).
 
 Find ornament list vector as orn_list_vector.
-
-Check orn_list_vector_index.
-Check projT1.
 
 Theorem test_index:
   forall (A : Type) (l : list A),

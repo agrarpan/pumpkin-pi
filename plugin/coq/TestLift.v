@@ -1,3 +1,4 @@
+Add LoadPath "coq".
 Require Import List.
 Require Import Ornamental.Ornaments.
 Require Import Test.
@@ -54,15 +55,7 @@ Qed.
 
 (* --- Simple projection tests ---- *)
 
-Check orn_list_vector_index.
-
-
 Lift list vector in orn_list_vector_index as ltv_indexer_lifted.
-
-Check ltv_indexer_lifted.
-Print ltv_indexer_lifted.
-
-Print test_exact_equality.
 
 Theorem testProj:
   forall A pv, ltv_indexer_lifted A pv = projT1 pv.
