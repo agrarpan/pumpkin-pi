@@ -214,14 +214,23 @@ let is_constr c prev_rules env trm sigma =
              
 (* Premises for COHERENCE *)
 let is_coh c env trm prev_rules sigma =
+  let _ = Feedback.msg_notice (Pp.str "Value of trm at the top of is_coh") in
+  let _ = Feedback.msg_notice (Printer.pr_constr_env env sigma trm) in
   let sigma, to_proj_o = is_proj c env trm sigma in
+  let _ = Feedback.msg_notice (Pp.str "Value of Option.has_some to_proj_oinside is_coh") in
+  let _ = Feedback.msg_notice (Pp.bool (Option.has_some to_proj_o)) in
+  let _ = Feedback.msg_notice (Pp.str "After the call to is_proj inside is_coh") in
   if Option.has_some to_proj_o then
+    let _ = Feedback.msg_notice (Pp.str "After the call to Option.has_some to_proj_o inside is_coh") in
     let sigma, terminate = terminate_coh prev_rules to_proj_o env trm sigma in
+    let _ = Feedback.msg_notice (Pp.str "In is_coh, the value of terminate is") in
+    let _ = Feedback.msg_notice (Pp.bool terminate) in
     if not terminate then
       sigma, to_proj_o
     else
       sigma, None
   else
+    let _ = Feedback.msg_notice (Pp.str "Outer else clause inside is_coh, which means to_proj_o dont got none") in
     sigma, None
 
 (* Premises for ETA *)
@@ -266,7 +275,12 @@ let determine_lift_rule c env trm prev_rules sigma =
       let typ, args = Option.get args_o in
       sigma, Equivalence (typ, args)
     else
+      (* TODO: PRINT all args to is_coh. That's the source of divergence. *)
+      (* let _ = Feedback.msg_notice (Pp.str c) in *)
+      (* let _ = Feedback.msg_notice (Pp.str prev_rules) in *)
       let sigma, to_proj_o = is_coh c env trm prev_rules sigma in
+      let _ = Feedback.msg_notice (Pp.str "Does to_proj_o have some?:") in
+      let _ = Feedback.msg_notice (Pp.bool (Option.has_some to_proj_o)) in
       if Option.has_some to_proj_o then
         let proj, args, trm_eta = Option.get to_proj_o in
         if arity trm_eta > arity trm then
