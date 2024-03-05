@@ -314,7 +314,6 @@ let initialize_proj_rules c env sigma =
     let t = mkRel 1 in
     match l.orn.kind with
     | Algebraic (indexer, _) ->
-      (* let _ = Feedback.msg_notice (Printer.pr_constr_env env sigma indexer) in *)
       (* indexer <-> projT1, id(_typ) <- (rew ... in projT2(_typ) *)
        let sigma, b_sig = Util.on_snd dest_sigT (reduce_type env_b sigma t) in
        let projT1 = reconstruct_lambda env_b (project_index b_sig t) in
@@ -671,10 +670,8 @@ let optimize_is_proj c env trm proj_is sigma =
 let check_is_proj c env trm proj_is sigma =
   let sigma, is_proj = optimize_is_proj c env trm proj_is sigma in
   if Option.has_some is_proj then
-    let _ = Feedback.msg_notice (Pp.str "Option.has_some is_proj is TRUE") in
     sigma, is_proj
   else
-    let _ = Feedback.msg_notice (Pp.str "Option.has_some is_proj is FALSE") in
     match kind trm with
     | App _ | Const _ -> (* this check is an optimization *)
        let f = first_fun trm in
@@ -716,36 +713,26 @@ let check_is_proj c env trm proj_is sigma =
 let is_proj c env trm sigma =
   (* TODO this function is a source of divergence, investigate *)
   let proj_term_rules, proj_type_rules = get_proj_map c in
-  let _ = Feedback.msg_notice (Pp.str "At the top of is_proj") in
   if List.length proj_term_rules = 0 then
-    let _ = Feedback.msg_notice (Pp.str "Length of proj_term_rules is zero") in
     sigma, None
   else
-    let _ = Feedback.msg_notice (Pp.str "Length of proj_term_rules is NOT zero") in
     let rec check proj_maps sigma =
       match proj_maps with
       | proj_map :: tl ->
          let proj_terms = List.map fst proj_map in
          let sigma, to_proj_o = check_is_proj c env trm proj_terms sigma in
-         let _ = Feedback.msg_notice (Pp.str "The result of Option.has_some to_proj_o in the match proj_maps clause") in
-         let _ = Feedback.msg_notice (Pp.bool (Option.has_some to_proj_o)) in
          if Option.has_some to_proj_o then
-           let _ = Feedback.msg_notice (Pp.str "In the if matching in is_proj") in
            let i, args, trm_eta = Option.get to_proj_o in
            let (_, proj) = List.nth proj_map i in
            sigma, Some (proj, args, trm_eta)
          else
-           let _ = Feedback.msg_notice (Pp.str "In the else matching in is_proj") in
            check tl sigma
       | _ ->
-         let _ = Feedback.msg_notice (Pp.str "In the _ matching in is_proj") in
          sigma, None
         in 
         if List.length proj_type_rules = 0 then
-          let _ = Feedback.msg_notice (Pp.str "Length of proj_type_rules is zero") in
           check [proj_term_rules; proj_type_rules] sigma
         else
-          let _ = Feedback.msg_notice (Pp.str "Length of proj_type_rules is NOT zero") in
           check [proj_term_rules; proj_type_rules] sigma
 
 (*
