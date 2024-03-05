@@ -16,7 +16,7 @@ let mk_n_evars n env =
     (fun r sigma ->
       let sigma, (earg_typ, _) = new_type_evar env sigma Evd.univ_flexible in
       let sigma, earg = new_evar env sigma earg_typ in
-      sigma, EConstr.to_constr sigma earg)
+      sigma, EConstr.to_constr ~abort_on_undefined_evars:false sigma earg)
     (mk_n_rels n)
 
 (*
