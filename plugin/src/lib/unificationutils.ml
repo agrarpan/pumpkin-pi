@@ -45,7 +45,7 @@ let unify_resolve_evars env trm1 trm2 sigma =
     try
       let sigma, etrm1 = Typing.solve_evars env sigma etrm1 in
       let sigma, etrm2 = Typing.solve_evars env sigma etrm2 in
-      sigma, Some (map_tuple (EConstr.to_constr sigma) (etrm1, etrm2))
+      sigma, Some (map_tuple (EConstr.to_constr ~abort_on_undefined_evars:false sigma) (etrm1, etrm2))
     with _ ->
       sigma, None
   else

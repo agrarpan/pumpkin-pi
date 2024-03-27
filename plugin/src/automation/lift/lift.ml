@@ -145,13 +145,13 @@ let lift_evar c env trm lift_rec sigma =
       match info.evar_body with
       | Evar_empty -> sigma, Evar_empty
       | Evar_defined bod ->
-         let bod = EConstr.to_constr sigma bod in
+         let bod = EConstr.to_constr ~abort_on_undefined_evars:false sigma bod in
          let sigma, lifted_bod = lift_rec env sigma c bod in
          sigma, Evar_defined (EConstr.of_constr lifted_bod)
     in
     let sigma, evar_candidates =
       if Option.has_some info.evar_candidates then
-        let candidates = List.map (EConstr.to_constr sigma) (Option.get info.evar_candidates) in
+        let candidates = List.map (EConstr.to_constr ~abort_on_undefined_evars:false sigma) (Option.get info.evar_candidates) in
         let sigma, lifted_candidates = map_rec_args_list lift_rec env sigma c candidates in
         sigma, Some (List.map EConstr.of_constr lifted_candidates)
       else
