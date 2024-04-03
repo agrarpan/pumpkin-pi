@@ -47,17 +47,12 @@ let refresh_env () : env state =
 
 let define_print ?typ n trm sigma =
   try
-    let _ = Feedback.msg_notice (Pp.str "At the top of define_print") in
     let trm = Evarutil.flush_and_check_evars sigma (EConstr.of_constr trm) in
-    let _ = Feedback.msg_notice (Pp.str "After the call to Evarutil.flush_and_check_vars in define_print") in
     let def =
       if Option.has_some typ then
-        let _ = Feedback.msg_notice (Pp.str "Option has some typ") in
         let typ = Evarutil.flush_and_check_evars sigma (EConstr.of_constr (Option.get typ)) in
-        let _ = Feedback.msg_notice (Pp.str "After the call to Evarutil.flush_and_check_vars in if clause in define_print") in
         define_term ~typ n sigma trm true
       else
-        let _ = Feedback.msg_notice (Pp.str "Option does not has some typ") in
         define_term n sigma trm true
     in
     Feedback.msg_info
@@ -336,8 +331,6 @@ let save_ornament d_old d_new d_orn_o d_orn_inv_o is_custom =
  *)
 let lift_definition_by_ornament env sigma n l c_old ignores =
   let sigma, lifted = do_lift_defn env sigma l c_old ignores in
-  let _ = Feedback.msg_notice (Pp.str "Value of lifted after call to do_lift_defn in lift definition by ornament") in
-  let _ = Feedback.msg_notice (Printer.pr_constr_env env sigma lifted) in
   try
     let def =
       if is_lift_type () then

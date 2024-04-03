@@ -161,3 +161,4 @@ theories/Ornaments.v
 
 coq/Test.v
 coq/Infrastructure.v
+coq/TestLift.v
