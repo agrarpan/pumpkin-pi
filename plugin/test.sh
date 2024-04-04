@@ -24,11 +24,11 @@ nonorn=false
 
 start=$SECONDS
 
-coqc coq/Infrastructure.v
+coqc -R coq Foo -Q theories Ornamental coq/Infrastructure.v
 
 echo "Testing Find ornament."
 
-if coqc coq/Test.v
+if coqc -R coq Foo -Q theories Ornamental coq/Test.v
 then
   :
 else
@@ -38,14 +38,14 @@ fi
 
 echo "Testing Lift."
 
-if coqc coq/TestLift.v
+if coqc -R coq Foo -Q theories Ornamental coq/TestLift.v
 then
   lifted=true
 else
   :
 fi
 
-if coqc coq/Indtype.v
+if coqc -R coq Foo -Q theories Ornamental coq/Indtype.v
 then
   liftedind=true
 else
@@ -54,7 +54,7 @@ fi
 
 echo "Testing Lift with implicit Find Ornament."
 
-if coqc coq/TestFindLift.v
+if coqc -R coq Foo -Q theories Ornamental coq/TestFindLift.v
 then
   findlift=true
 else
@@ -63,21 +63,21 @@ fi
 
 echo "Testing Lift Record."
 
-if coqc coq/minimal_records.v
+if coqc -R coq Foo -Q theories Ornamental coq/minimal_records.v
 then
   records=true
 else
   :
 fi
 
-if coqc coq/handshake.v
+if coqc -R coq Foo -Q theories Ornamental coq/handshake.v
 then
   handshake=true
 else
   :
 fi
 
-if coqc coq/more_records.v
+if coqc -R coq Foo -Q theories Ornamental coq/more_records.v
 then
   morerecords=true
 else
@@ -86,7 +86,7 @@ fi
 
 cd coq
 
-if coqc prod_rect.v
+if coqc -R coq Foo -Q theories Ornamental prod_rect.v
 then
   prodrect=true
 else
@@ -97,7 +97,7 @@ cd ..
 
 echo "Testing Swap Constructor."
 
-if coqc coq/Swap.v
+if coqc -R coq Foo -Q theories Ornamental coq/Swap.v
 then
   swap=true
 else
@@ -106,7 +106,7 @@ fi
 
 echo "Testing Unpack Sigma."
 
-if coqc coq/TestUnpack.v
+if coqc -R coq Foo -Q theories Ornamental coq/TestUnpack.v
 then
   unpack=true
 else
@@ -115,7 +115,7 @@ fi
 
 echo "Testing Non-Ornaments."
 
-if coqc coq/nonorn.v
+if coqc -R coq Foo -Q theories Ornamental coq/nonorn.v
 then
   nonorn=true
 else
@@ -125,7 +125,7 @@ fi
 echo "Testing smart cache."
 echo "First, without the smart cache:"
 
-if coqc coq/NoSmartCache.v
+if coqc -R coq Foo -Q theories Ornamental coq/NoSmartCache.v
 then
   nosmartcache=true
 else
@@ -134,7 +134,7 @@ fi
 
 echo "Now, with the smart cache:"
 
-if coqc coq/SmartCache.v
+if coqc -R coq Foo -Q theories Ornamental coq/SmartCache.v
 then
   smartcache=true
 else
@@ -172,56 +172,56 @@ cd ..
 
 echo "Running ITP paper examples."
 
-if coqc coq/examples/Intro.v
+if coqc -R coq Foo -Q theories Ornamental coq/examples/Intro.v
 then
   intro=true
 else
   :
 fi
 
-if coqc coq/examples/Example.v
+if coqc -R coq Foo -Q theories Ornamental coq/examples/Example.v
 then
   example=true
 else
   :
 fi
 
-if coqc coq/examples/Search.v
+if coqc -R coq Foo -Q theories Ornamental coq/examples/Search.v
 then
   search=true
 else
   :
 fi
 
-if coqc coq/examples/LiftSpec.v
+if coqc -R coq Foo -Q theories Ornamental coq/examples/LiftSpec.v
 then
   liftspec=true
 else
   :
 fi
 
-if coqc coq/examples/Assumptions.v
+if coqc -R coq Foo -Q theories Ornamental coq/examples/Assumptions.v
 then
   assumptions=true
 else
   :
 fi
 
-if coqc coq/examples/Lift.v
+if coqc -R coq Foo -Q theories Ornamental coq/examples/Lift.v
 then
   lift=true
 else
   :
 fi
 
-if coqc coq/examples/ListToVect.v
+if coqc -R coq Foo -Q theories Ornamental coq/examples/ListToVect.v
 then
   listtovect=true
 else
   :
 fi
 
-if coqc coq/examples/ListToVectCustom.v
+if coqc -R coq Foo -Q theories Ornamental coq/examples/ListToVectCustom.v
 then
   listtovectcustom=true
 else

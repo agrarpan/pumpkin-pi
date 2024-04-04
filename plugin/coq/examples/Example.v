@@ -6,7 +6,6 @@
  * take a look at the state of this file in the ITP release.
  *)
 
-Add LoadPath "coq/examples".
 Require Import Vector.
 Require Import List.
 Require Import Ornamental.Ornaments.
