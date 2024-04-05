@@ -10,4 +10,4 @@ cd deps/fix-to-elim/plugin
 ./build.sh
 cd ../../..
 echo "building DEVOID"
-make
+make && make install
