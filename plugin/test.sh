@@ -84,16 +84,14 @@ else
   :
 fi
 
-cd coq
 
-if coqc -R coq Foo -Q theories Ornamental prod_rect.v
+if coqc -R coq Foo -Q theories Ornamental coq/prod_rect.v
 then
   prodrect=true
 else
   :
 fi
 
-cd ..
 
 echo "Testing Swap Constructor."
 
