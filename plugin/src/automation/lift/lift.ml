@@ -218,12 +218,12 @@ let lift_core env c trm sigma =
            let en_e = push_let_in (n.binder_name, trm, typ) en in
            let sigma, e' = lift_rec en_e sigma (zoom c) e in
            (sigma, mkLetIn (n, trm', typ', e'))
-        | Case (ci, ct, m, bs) ->
+        | Case (ci, ct, iv, m, bs) ->
            (* CASE (will not work if this destructs over A; preprocess first) *)
            let sigma, ct' = lift_rec en sigma c ct in
            let sigma, m' = lift_rec en sigma c m in
            let sigma, bs' = map_rec_args lift_rec en sigma c bs in
-           (sigma, mkCase (ci, ct', m', bs'))
+           (sigma, mkCase (ci, ct', iv, m', bs'))
         | Fix ((is, i), (ns, ts, ds)) ->
            (* FIX (will not work if this destructs over A; preprocess first) *)
            let sigma, ts' = map_rec_args lift_rec en sigma c ts in
@@ -315,7 +315,7 @@ let do_lift_ind env sigma l typename suffix ind ignores is_lift_module =
   else
     let _ = check_inductive_supported mind_body in
     let env, univs, arity, constypes = open_inductive ~global:true env mind_specif in
-    let sigma = Evd.update_sigma_env sigma env in
+    let sigma = Evd.update_sigma_univs (Global.universes ()) sigma in
     let nparam = mind_body.mind_nparams_rec in
     let sigma, arity' = do_lift_term env sigma l arity ignores in
     let sigma, constypes' = map_state (fun trm sigma -> do_lift_term env sigma l trm ignores) constypes sigma in
@@ -358,7 +358,7 @@ let do_lift_ind env sigma l typename suffix ind ignores is_lift_module =
           r.s_PROJ
       in
       (try
-         declare_structure_entry {s_CONST = (ind',1); s_EXPECTEDPARAM = r.s_EXPECTEDPARAM; s_PROJKIND = pks; s_PROJ = ps};
+         Record.Internal.declare_structure_entry {s_CONST = (ind',1); s_EXPECTEDPARAM = r.s_EXPECTEDPARAM; s_PROJKIND = pks; s_PROJ = ps};
          ind'
        with _ ->
          Feedback.msg_warning

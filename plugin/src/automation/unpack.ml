@@ -10,7 +10,7 @@ let eval_tactic env sigma ?goal tac =
   let (sigma, (typ, _)) = Evarutil.new_type_evar env sigma Evd.univ_flexible_alg in
   let (ent, pv) = Proofview.init sigma [(env, typ)] in
   let sigma0 = sigma in
-  let ((), pv, (unsafe, shelved, obliged), _) = Proofview.apply ~name:(qualid_basename tactic_script) ~poly:true env tac pv in
+  let ((), pv, unsafe, _) = Proofview.apply ~name:(qualid_basename tactic_script) ~poly:true env tac pv in
   let sigma = Proofview.return pv in
   (* NOTE: Technically our current examples/tests do not require this post-processing
    * unification step, but I suspect that it may sometimes be necessary to ensure that
