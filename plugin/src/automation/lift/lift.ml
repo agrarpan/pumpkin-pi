@@ -282,7 +282,7 @@ let define_lifted_eliminator ?(suffix="_sigT") l ind0 ind sort =
       let term, typ = EConstr.(to_constr sigma term, to_constr sigma typ) in
       sigma, Depelim.eta_guard_eliminator mind_specif term typ
     in
-    let elim' = UnivGen.constr_of_monomorphic_global (Defutils.define_term ~typ:eta_type ident sigma eta_term true) in
+    let elim' = UnivGen.constr_of_monomorphic_global (Defutils.define_term ~typ:eta_type ident sigma eta_term) in
     let elim0 = UnivGen.constr_of_monomorphic_global elim0 in
     save_lifting (lift_to l, lift_back l, elim0) elim';
     save_lifting (lift_back l, lift_to l, elim') elim0
@@ -351,7 +351,7 @@ let do_lift_ind env sigma l typename suffix ind ignores is_lift_module =
                let c = mkConst p in
                let sigma, p_lifted = do_lift_term env sigma l c ignores in
                let n = Names.Label.to_id (Names.Constant.label p) in
-               let def = Defutils.define_term n sigma p_lifted true in
+               let def = Defutils.define_term n sigma p_lifted in
                Feedback.msg_info
                  (Pp.str (Printf.sprintf "DEVOID generated %s" (Names.Id.to_string n)));
                def))

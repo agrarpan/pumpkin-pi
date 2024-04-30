@@ -541,8 +541,8 @@ let initialize_etas c cached env sigma =
         in
         let eta_a, eta_b = ((eta_a_n, eta_a), (eta_b_n, eta_b)) in
         try
-          let eta_a = define_term (fst eta_a) sigma (snd eta_a) true in
-          let eta_b = define_term (fst eta_b) sigma (snd eta_b) true in
+          let eta_a = define_term (fst eta_a) sigma (snd eta_a) in
+          let eta_b = define_term (fst eta_b) sigma (snd eta_b) in
           map_tuple UnivGen.constr_of_monomorphic_global (eta_a, eta_b)
         with _ ->
           snd eta_a, snd eta_b
@@ -602,14 +602,14 @@ let initialize_iotas c cached env sigma =
           Array.mapi
             (fun i rew ->
               let n = with_suffix (fst iota_a) (string_of_int i) in
-              define_term n sigma rew true)
+              define_term n sigma rew)
             (snd iota_a)
         in
         let iota_bs =
           Array.mapi
             (fun i rew ->
               let n = with_suffix (fst iota_b) (string_of_int i) in
-              define_term n sigma rew true)
+              define_term n sigma rew)
             (snd iota_b)
         in map_tuple (Array.map UnivGen.constr_of_monomorphic_global) (iota_as, iota_bs)
       in save_iota (l.orn.promote, l.orn.forget) iotas; sigma, iotas
@@ -1271,14 +1271,14 @@ let initialize_dep_constrs c cached env sigma =
           Array.mapi
             (fun i c ->
               let n = with_suffix (fst a_constrs) (string_of_int i) in
-              define_term n sigma c true)
+              define_term n sigma c)
             (snd a_constrs)
         in
         let b_constrs =
           Array.mapi
             (fun i c ->
               let n = with_suffix (fst b_constrs) (string_of_int i) in
-              define_term n sigma c true)
+              define_term n sigma c)
             (snd b_constrs)
         in map_tuple (Array.map UnivGen.constr_of_monomorphic_global) (a_constrs, b_constrs)
       in
@@ -1840,8 +1840,8 @@ let initialize_dep_elims c cached env sigma =
         (with_suffix base_n "dep_elim_a", with_suffix base_n "dep_elim_b")
       in
       let elim_a, elim_b = ((elim_a_n, a_elim), (elim_b_n, b_elim)) in
-      let elim_a = define_term (fst elim_a) sigma (snd elim_a) true in
-      let elim_b = define_term (fst elim_b) sigma (snd elim_b) true in
+      let elim_a = define_term (fst elim_a) sigma (snd elim_a) in
+      let elim_b = define_term (fst elim_b) sigma (snd elim_b) in
       let elims = map_tuple UnivGen.constr_of_monomorphic_global (elim_a, elim_b) in
       save_dep_elim (c.l.orn.promote, c.l.orn.forget) elims;
       save_lifting (c.l.orn.promote, c.l.orn.forget, (fst elims)) (snd elims);

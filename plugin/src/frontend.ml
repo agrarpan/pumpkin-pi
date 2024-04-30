@@ -51,9 +51,9 @@ let define_print ?typ n trm sigma =
     let def =
       if Option.has_some typ then
         let typ = Evarutil.flush_and_check_evars sigma (EConstr.of_constr (Option.get typ)) in
-        define_term ~typ n sigma trm true
+        define_term ~typ n sigma trm
       else
-        define_term n sigma trm true
+        define_term n sigma trm
     in
     Feedback.msg_info
       (str (Printf.sprintf "DEVOID generated %s" (Id.to_string n)));
