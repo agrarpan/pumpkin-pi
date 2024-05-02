@@ -1,8 +1,8 @@
 [submodule "plugin/src/coq-plugin-lib"]
 	path = plugin/src/coq-plugin-lib
 	url = https://github.com/agrarpan/coq-plugin-lib.git
-	branch = coq-8.10
+	branch = coq-8.11
 [submodule "plugin/deps/fix-to-elim"]
 	path = plugin/deps/fix-to-elim
 	url = https://github.com/agrarpan/fix-to-elim.git
-	branch = master
+	branch = coq-8.11
