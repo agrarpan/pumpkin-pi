@@ -22,7 +22,7 @@ let eval_tactic env sigma ?goal tac =
 let call_tactic env sigma tac args =
   let open Tacexpr in
   let args = List.map (fun e -> ConstrMayEval (Genredexpr.ConstrTerm e)) args in
-  TacArg (CAst.make (TacCall (CAst.make (tac, args)))) |> Tacinterp.interp |>
+  CAst.make (TacArg  (TacCall (CAst.make (tac, args)))) |> Tacinterp.interp |>
   eval_tactic env sigma
 
 let unpack_constant env sigma const =
