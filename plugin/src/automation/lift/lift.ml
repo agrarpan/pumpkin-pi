@@ -203,36 +203,37 @@ let lift_core env c trm sigma =
            (* PROD *)
            let sigma, t' = lift_rec en sigma c t in
            let en_b = push_local (n.binder_name, t) en in
-           let sigma, b' = lift_rec en_b sigma (zoom c) b in
+           let sigma, b' = lift_rec en_b sigma (zoom env c) b in
            (sigma, mkProd (n, t', b'))
         | Lambda (n, t, b) ->
            (* LAMBDA *)
            let sigma, t' = lift_rec en sigma c t in
            let en_b = push_local (n.binder_name, t) en in
-           let sigma, b' = lift_rec en_b sigma (zoom c) b in
+           let sigma, b' = lift_rec en_b sigma (zoom env c) b in
            (sigma, mkLambda (n, t', b'))
         | LetIn (n, trm, typ, e) ->
            (* LETIN *)
            let sigma, trm' = lift_rec en sigma c trm in
            let sigma, typ' = lift_rec en sigma c typ in
            let en_e = push_let_in (n.binder_name, trm, typ) en in
-           let sigma, e' = lift_rec en_e sigma (zoom c) e in
+           let sigma, e' = lift_rec en_e sigma (zoom env c) e in
            (sigma, mkLetIn (n, trm', typ', e'))
-        | Case (ci, ct, iv, m, bs) ->
+        | Case (ci, u, pms, p, iv, c', brs) ->
+           let (ci, ct, iv, m, bs) = Inductive.expand_case env (ci, u, pms, p, iv, c', brs) in
            (* CASE (will not work if this destructs over A; preprocess first) *)
            let sigma, ct' = lift_rec en sigma c ct in
            let sigma, m' = lift_rec en sigma c m in
            let sigma, bs' = map_rec_args lift_rec en sigma c bs in
-           (sigma, mkCase (ci, ct', iv, m', bs'))
+           (sigma, mkCase ((Inductive.contract_case env) (ci, ct', iv, m', bs')))
         | Fix ((is, i), (ns, ts, ds)) ->
            (* FIX (will not work if this destructs over A; preprocess first) *)
            let sigma, ts' = map_rec_args lift_rec en sigma c ts in
-           let sigma, ds' = map_rec_args (fun en sigma a trm -> map_rec_env_fix lift_rec zoom en sigma a ns ts trm) en sigma c ds in
+           let sigma, ds' = map_rec_args (fun en sigma a trm -> map_rec_env_fix lift_rec (zoom env) en sigma a ns ts trm) en sigma c ds in
            (sigma, mkFix ((is, i), (ns, ts', ds')))
         | CoFix (i, (ns, ts, ds)) ->
            (* COFIX (will not work if this destructs over A; preprocess first) *)
            let sigma, ts' = map_rec_args lift_rec en sigma c ts in
-           let sigma, ds' = map_rec_args (fun en sigma a trm -> map_rec_env_fix lift_rec zoom en sigma a ns ts trm) en sigma c ds in
+           let sigma, ds' = map_rec_args (fun en sigma a trm -> map_rec_env_fix lift_rec (zoom env) en sigma a ns ts trm) en sigma c ds in
            (sigma, mkCoFix (i, (ns, ts', ds')))
         | Proj (pr, co) ->
            (* PROJ *)
@@ -297,6 +298,10 @@ let declare_inductive_liftings l ind ind' ncons =
     (List.init ncons (fun i -> mkConstruct (ind, i + 1)))
     (List.init ncons (fun i -> mkConstruct (ind', i + 1)))
 
+let tr_projection mod_path (p: Structures.Structure.projection) : Structures.Structure.projection =
+  {p with proj_body = Option.map (fun x -> Names.Constant.make2 mod_path (Names.Constant.label x)) p.proj_body}
+  
+
 (*
  * Lift the inductive type using sigma-packing.
  *
@@ -332,17 +337,12 @@ let do_lift_ind env sigma l typename suffix ind ignores is_lift_module =
     try
       let env = Global.env () in
       let sigma = Evd.from_env env in
-      let open Recordops in
-      let r = lookup_structure ind in
+      let open Structures in
+      let r = Structure.find ind in
       Feedback.msg_info (Pp.str "Lifted a record");
-      let pks = r.s_PROJKIND in
+      let projections = r.projections in
       let mod_path = Lib.current_mp () in
-      let ps =
-        List.map
-          (Option.map
-             (fun p -> Names.Constant.make2 mod_path (Names.Constant.label p)))
-          r.s_PROJ
-      in
+      let projections' = List.map (tr_projection mod_path) projections in
       let _ =
         List.map
           (Option.map
@@ -355,10 +355,11 @@ let do_lift_ind env sigma l typename suffix ind ignores is_lift_module =
                Feedback.msg_info
                  (Pp.str (Printf.sprintf "DEVOID generated %s" (Names.Id.to_string n)));
                def))
-          r.s_PROJ
+          (List.map (fun (p: Structures.Structure.projection) -> p.proj_body) projections)
       in
       (try
-         Record.Internal.declare_structure_entry {s_CONST = (ind',1); s_EXPECTEDPARAM = r.s_EXPECTEDPARAM; s_PROJKIND = pks; s_PROJ = ps};
+         let struc = Structures.Structure.make (Global.env ()) ind' projections' in
+         Record.Internal.declare_structure_entry struc;
          ind'
        with _ ->
          Feedback.msg_warning
